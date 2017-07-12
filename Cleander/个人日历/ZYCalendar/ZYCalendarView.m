@@ -71,7 +71,7 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
 }
 #pragma mark 创建collectionView
 - (void)creatSubViews{
-    weekArray = @[@"日",@"一",@"二",@"三",@"四",@"五",@"六"];
+    weekArray = @[@"Sun",@"Mon",@"Tue",@"Wed",@"Thu",@"Fri",@"Sat"];
     //初始化布局，创建layout，必须设置
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     //设置内容滑动方向
@@ -89,7 +89,7 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
     //签署代理和数据源
     _collectionView.delegate = self;
     _collectionView.dataSource = self;
-    _collectionView.backgroundColor = [UIColor redColor];
+    _collectionView.backgroundColor = [UIColor whiteColor];
     [_collectionView registerClass:[ZYCalendarCollectionViewCell class] forCellWithReuseIdentifier:ZYCalendarCellIdentifier];
 }
 
@@ -115,7 +115,7 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
     
     ZYCalendarCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:ZYCalendarCellIdentifier forIndexPath:indexPath];
     
-    cell.backgroundColor = [UIColor orangeColor];
+    cell.backgroundColor = [UIColor whiteColor];
     cell.dayLabel.text = [NSString stringWithFormat:@"%ld",indexPath.item+1];
     if (indexPath.section == 0) {
         cell.dayLabel.text = weekArray[indexPath.item];
@@ -124,18 +124,28 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
         cell.dayLabel.layer.masksToBounds = YES;
         cell.dayLabel.textColor = [UIColor blackColor];
     }else {
+        //本月天数
         NSInteger daysInThisMonth = [[ZYCalendarConfiger ShareInstance] totaldaysInMonth:_date];
+        //上一个的天数
+        NSInteger daysOfLastMonth = [[ZYCalendarConfiger ShareInstance] totaldaysInMonth:[[ZYCalendarConfiger ShareInstance] lastMonth:_date]];
+        //本月第一个星期六是几号
         NSInteger firstWeekday = [[ZYCalendarConfiger ShareInstance] firstWeekdayInThisMonth:_date];
         
         NSInteger day = 0;
         NSInteger i = indexPath.row;
         
         if (i < firstWeekday || i > firstWeekday + daysInThisMonth - 1) {
-            [cell.dayLabel setText:@""];
+            if (i<firstWeekday) {
+                [cell.dayLabel setText:[NSString stringWithFormat:@"%ld",daysOfLastMonth-firstWeekday+i+1]];
+            }
+            if (i > firstWeekday + daysInThisMonth - 1) {
+                [cell.dayLabel setText:[NSString stringWithFormat:@"%ld",i-daysInThisMonth-firstWeekday+1]];
+            }
+            
             cell.dayLabel.backgroundColor = [UIColor clearColor];
             cell.dayLabel.layer.cornerRadius = 0;
             cell.dayLabel.layer.masksToBounds = YES;
-            cell.dayLabel.textColor = [UIColor blackColor];
+            cell.dayLabel.textColor = [UIColor lightGrayColor];
 
             
         }else{
@@ -149,7 +159,7 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
                 cell.dayLabel.backgroundColor = [UIColor lightGrayColor];
                 cell.dayLabel.layer.cornerRadius = cell.dayLabel.bounds.size.width/2.0;
                 cell.dayLabel.layer.masksToBounds = YES;
-                cell.dayLabel.textColor = [UIColor purpleColor];
+                cell.dayLabel.textColor = [UIColor whiteColor];
                 
             }else{
                 cell.dayLabel.backgroundColor = [UIColor clearColor];
@@ -172,6 +182,7 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
 }
 #define mark单元格得点击方法
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    //若点击的是第零组，或者是上个月日期，不做操作
     if (indexPath.section == 0) {
         return;
     }
@@ -183,35 +194,44 @@ NSString *const ZYCalendarCellIdentifier = @"calendarCell";
         return;
     }
     
-    
+    //更改当前点击的cell的颜色
     ZYCalendarCollectionViewCell *cell = (ZYCalendarCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
     cell.dayLabel.backgroundColor = [UIColor lightGrayColor];
     cell.dayLabel.layer.cornerRadius = cell.dayLabel.bounds.size.width/2.0;
     cell.dayLabel.layer.masksToBounds = YES;
-    cell.dayLabel.textColor = [UIColor purpleColor];
+    cell.dayLabel.textColor = [UIColor whiteColor];
     
 }
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath{
+    //若点击的是第零组，或者是不属于当前月的日期，不做操作
     if (indexPath.section == 0) {
         return;
     }
+    NSInteger daysInThisMonth = [[ZYCalendarConfiger ShareInstance] totaldaysInMonth:_date];
+    NSInteger firstWeekday = [[ZYCalendarConfiger ShareInstance] firstWeekdayInThisMonth:_date];
+    NSInteger i = indexPath.row;
+    
+    if (i < firstWeekday || i > firstWeekday + daysInThisMonth - 1) {
+        return;
+    }
+    //更改之前点击cell的颜色
     ZYCalendarCollectionViewCell *cell = (ZYCalendarCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
     cell.dayLabel.backgroundColor = [UIColor clearColor];
     cell.dayLabel.layer.cornerRadius = 0;
     cell.dayLabel.layer.masksToBounds = YES;
     cell.dayLabel.textColor = [UIColor blackColor];
-    NSInteger firstWeekday = [[ZYCalendarConfiger ShareInstance] firstWeekdayInThisMonth:_date];
+//    NSInteger firstWeekday = [[ZYCalendarConfiger ShareInstance] firstWeekdayInThisMonth:_date];
     NSInteger day = indexPath.row - firstWeekday + 1;
     
     NSInteger year = [[ZYCalendarConfiger ShareInstance] year:_date];
     NSInteger month = [[ZYCalendarConfiger ShareInstance] month:_date];
-    
+    //如果上一次点击的是当前日期，则更改为选中状态
     if (currentYear == year && currentMonth == month && currentDay == day) {
         
         cell.dayLabel.backgroundColor = [UIColor lightGrayColor];
         cell.dayLabel.layer.cornerRadius = cell.dayLabel.bounds.size.width/2.0;
         cell.dayLabel.layer.masksToBounds = YES;
-        cell.dayLabel.textColor = [UIColor purpleColor];
+        cell.dayLabel.textColor = [UIColor whiteColor];
         
     }
 }

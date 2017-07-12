@@ -25,9 +25,9 @@
 
 //计算当前月份第一个星期天
 - (NSInteger)firstWeekdayInThisMonth:(NSDate *)date;
-//计算当前月份的第一天
+#pragma mark 返回当前月有多少天
 - (NSInteger)totaldaysInThisMonth:(NSDate *)date;
-//计算月份的第一天
+#pragma mark 返回下一个月有多少天
 - (NSInteger)totaldaysInMonth:(NSDate *)date;
 
 @end

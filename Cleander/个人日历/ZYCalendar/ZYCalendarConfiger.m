@@ -24,18 +24,18 @@
     return zycalen;
 }
 
-#pragma mark - 计算年月
+//得到date中是第几天
 - (NSInteger)day:(NSDate *)date{
     NSDateComponents *components = [[NSCalendar currentCalendar] components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:date];
     return [components day];
 }
 
-
+//得到date中时第几月
 - (NSInteger)month:(NSDate *)date{
     NSDateComponents *components = [[NSCalendar currentCalendar] components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:date];
     return [components month];
 }
-
+//得到date中是哪一年
 - (NSInteger)year:(NSDate *)date{
     NSDateComponents *components = [[NSCalendar currentCalendar] components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:date];
     return [components year];
@@ -54,6 +54,7 @@
     NSDate *newDate = [[NSCalendar currentCalendar] dateByAddingComponents:dateComponents toDate:date options:0];
     return newDate;
 }
+//获取date中月份的第一天对应星期几
 - (NSInteger)firstWeekdayInThisMonth:(NSDate *)date{
     NSCalendar *calendar = [NSCalendar currentCalendar];
     
@@ -65,7 +66,18 @@
     NSUInteger firstWeekday = [calendar ordinalityOfUnit:NSCalendarUnitWeekday inUnit:NSCalendarUnitWeekOfMonth forDate:firstDayOfMonthDate];
     return firstWeekday - 1;
 }
-
+//获取date中日期对应的星期 0星期六 1星期天 2星期一 3星期二 4星期三 5星期四 6星期五
+- (NSInteger)getWeekWithDate:(NSDate *)date{
+    
+    NSInteger weekDay = [self firstWeekdayInThisMonth:date];
+    NSInteger cureentDay = [self day:date];
+    
+    //当前日期
+    NSInteger currentWeek = (cureentDay%7 + weekDay)%7;
+    return currentWeek;
+    
+}
+//得到date中每月有多少天
 - (NSInteger)totaldaysInThisMonth:(NSDate *)date{
     NSRange totaldaysInMonth = [[NSCalendar currentCalendar] rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:date];
     return totaldaysInMonth.length;
